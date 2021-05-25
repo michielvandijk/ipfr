@@ -356,7 +356,7 @@ ipu <- function(primary_seed, primary_targets,
     ggplot2::labs(
       x = "Weight Ratio = Weight / Average Weight", y = "Count of Seed Records"
     )
-  
+
   # Compare resulting weights to initial targets
   primary_comp <- compare_results(primary_seed, primary_targets)
   result$primary_comp <- primary_comp
@@ -379,6 +379,30 @@ ipu <- function(primary_seed, primary_targets,
     )
     result$secondary_comp <- secondary_comp
   }
+  
+  # Add convergence statistics to result
+  stats <- list()
+  stats[["stats_sum"]] <- data.frame(
+    iterations = iter,
+    pct_rmse = pct_rmse,
+    converged = converged
+  )
+  
+  if(!is.null(saved_diff_tbl)){
+    position <- which(abs(saved_diff_tbl$pct_diff) == pct_diff)[1]
+    stats[["stats_sum"]] <- data.frame(
+        iterations = iter,
+        pct_rmse = pct_rmse,
+        converged = converged,
+        worst_marginal_stats_category = saved_category,
+      worst_per_diff = round(saved_diff_tbl$pct_diff[position] * 100, 2),
+      abs_difference = round(saved_diff_tbl$diff[position], 2)
+    )
+    stats[["diff_tbl"]] <- saved_diff_tbl
+    stats[["geo_all"]] <- saved_geo
+  }
+  
+  result$stats <- stats
   
   return(result)
 }
